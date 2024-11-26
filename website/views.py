@@ -14,15 +14,6 @@ def index(request):
         messages.info(request, "No employees found.")
     return render(request, 'index.html', {'employees': employees})
 
-
-
-def view_employee(request, id):
-    employee = get_object_or_404(Employee, pk=id)
-    return render(request, "view_employee.html", {
-        'employee': employee
-    })
-
-
 def add_employee(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST)
@@ -39,29 +30,39 @@ def add_employee(request):
     })
 
 
+def view_employee(request, employee_id):
+    employee = get_object_or_404(Employee, employee_id=employee_id)
+    return render(request, "view_employee.html", {
+        'employee': employee
+    })
+
 def edit_employee(request, id):
     employee = get_object_or_404(Employee, pk=id)
     if request.method == 'POST':
         form = EmployeeForm(request.POST, instance=employee)
         if form.is_valid():
             form.save()
-            return render(request, 'edit_employee.html', {
-                'form': form,
-                'success': True
-            })
+            messages.success(request, f"Employee {employee.first_name} {employee.last_name} updated successfully!")
+            return redirect('index')
+        else:
+            messages.error(request, "There was an error updating the employee. Please try again.")
     else:
         form = EmployeeForm(instance=employee)
     return render(request, 'edit_employee.html', {
-        'form': form
+        'form': form,
+        'employee': employee,
     })
 
 
 def delete_employee(request, id):
+    employee = get_object_or_404(Employee, pk=id)
+    
     if request.method == 'POST':
-        employee = get_object_or_404(Employee, pk=id)
         employee.delete()
-        return HttpResponseRedirect(reverse('index'))
-
+        messages.success(request, f"Employee {employee.first_name} {employee.last_name} has been deleted.")
+        return redirect('index')
+    
+    return redirect('index')
 
 def home(request):
     if request.method == 'POST':
