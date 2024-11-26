@@ -9,9 +9,11 @@ from .forms import EmployeeForm, SignUpForm
 
 
 def index(request):
-    return render(request, "index.html", {
-        'employees': Employee.objects.all()
-    })
+    employees = Employee.objects.all()
+    if not employees:
+        messages.info(request, "No employees found.")
+    return render(request, 'index.html', {'employees': employees})
+
 
 
 def view_employee(request, id):
